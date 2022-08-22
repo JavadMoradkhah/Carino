@@ -16,10 +16,10 @@ const validate = (req: Request) => {
     name: Joi.string()
       .min(3)
       .max(30)
-      .pattern(/^[A-Z]+[a-z|-|\s]+$/)
+      .pattern(/^[A-Z]+[A-Z|a-z|-|\s]+$/)
       .required(),
   });
   return schema.validate(req.body);
 };
 
-export default { Brand, validate };
+export { Brand, validate };
