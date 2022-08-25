@@ -1,7 +1,6 @@
 import { User, validate } from '../models/User';
 import bcrypt from 'bcrypt';
 import { mongo } from 'mongoose';
-import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 
 const registerUser = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
@@ -18,15 +17,9 @@ const registerUser = async (req: Request, res: Response, next: NextFunction): Pr
 
     await user.save();
 
-    if (!process.env.JWT_SECRET) {
-      return next(new Error('The JWT_SECRET environment variable is not provided!'));
-    }
+    const result = user.parseUserResult();
 
-    const result: any = user.toObject();
-
-    delete result.password;
-
-    const token = jwt.sign(result, process.env.JWT_SECRET, { expiresIn: '24h' });
+    const token = user.generateAuthToken(result);
 
     result.token = token;
 
@@ -58,15 +51,9 @@ const loginUser = async (req: Request, res: Response, next: NextFunction): Promi
       return res.status(400).send({ message: 'The given email or password in invalid' });
     }
 
-    if (!process.env.JWT_SECRET) {
-      return next(new Error('The JWT_SECRET environment variable is not provided!'));
-    }
+    const payload = user.parseUserResult();
 
-    const payload: any = user.toObject();
-
-    delete payload.password;
-
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '24h' });
+    const token = user.generateAuthToken(payload);
 
     payload.token = token;
 

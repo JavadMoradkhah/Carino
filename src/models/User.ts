@@ -1,12 +1,9 @@
 import Joi from 'joi';
+import jwt from 'jsonwebtoken';
+import User from '../tsd/interfaces/User';
+import UserResult from '../tsd/interfaces/UserResult';
 import { Request } from 'express';
 import { Schema, model } from 'mongoose';
-
-interface User {
-  name: string;
-  email: string;
-  password: string; // The password is optional to remove the password from the response body after user registration
-}
 
 const UserSchema = new Schema<User>(
   {
@@ -16,6 +13,24 @@ const UserSchema = new Schema<User>(
   },
   { timestamps: true }
 );
+
+UserSchema.methods.parseUserResult = function () {
+  return this.toObject({
+    versionKey: false,
+    transform: function (doc: UserResult, ret: UserResult) {
+      delete ret.password;
+      return ret;
+    },
+  });
+};
+
+UserSchema.methods.generateAuthToken = function (parsedUser: UserResult) {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('The JWT_SECRET environment variable is not provided!');
+  }
+
+  return jwt.sign(parsedUser, process.env.JWT_SECRET, { expiresIn: '24h' });
+};
 
 const User = model<User>('User', UserSchema);
 
