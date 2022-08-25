@@ -1,6 +1,6 @@
-import { Car, validate } from '../models/Car';
+import AuthRequest from '../tsd/interfaces/AuthRequest';
+import { Car } from '../models/Car';
 import { Brand } from '../models/Brand';
-import { User } from '../models/User';
 import { Request, Response, NextFunction } from 'express';
 
 const getAllCars = async (req: Request, res: Response, next: NextFunction) => {
@@ -26,11 +26,10 @@ const getCarByID = async (req: Request, res: Response, next: NextFunction): Prom
   }
 };
 
-const createCar = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+const createCar = async (req: AuthRequest, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
-    const { error: validationError } = validate(req);
-    if (validationError) {
-      return res.status(400).send({ message: validationError.message });
+    if (!req.user) {
+      return res.status(401).send({ message: 'Authentication is required to access this resource.' });
     }
 
     const brand = await Brand.findById(req.body.brand);
@@ -40,14 +39,9 @@ const createCar = async (req: Request, res: Response, next: NextFunction): Promi
 
     req.body.brand = { _id: brand._id, name: brand.name };
 
-    const seller = await User.findById(req.body.seller);
-    if (!seller) {
-      return res.status(400).send({ message: 'The given seller ID is invalid' });
-    }
+    req.body.seller = { _id: req.user._id, name: req.user.name, email: req.user.email };
 
-    req.body.seller = { _id: seller._id, name: seller.name, email: seller.email };
-
-    let car = new Car(req.body);
+    const car = new Car(req.body);
 
     await car.save();
 
@@ -57,17 +51,21 @@ const createCar = async (req: Request, res: Response, next: NextFunction): Promi
   }
 };
 
-const updateCar = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+const updateCar = async (req: AuthRequest, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
+    if (!req.user) {
+      return res.status(401).send({ message: 'Authentication is required to access this resource.' });
+    }
+
     let car = await Car.findById(req.params.id);
 
     if (!car) {
       return res.status(404).send({ message: 'The car not found with the given ID' });
     }
 
-    const { error: validationError } = validate(req, true);
-    if (validationError) {
-      return res.status(400).send({ message: validationError.message });
+    // Checking if does user updating his own car and not the others'
+    if (req.user.email !== car.seller.email) {
+      return res.status(403).send({ message: "You cannot change others' cars information" });
     }
 
     if (req.body.brand) {
@@ -80,16 +78,6 @@ const updateCar = async (req: Request, res: Response, next: NextFunction): Promi
       req.body.brand = { _id: brand._id, name: brand.name };
     }
 
-    if (req.body.seller) {
-      const seller = await User.findById(req.body.seller);
-
-      if (!seller) {
-        return res.status(400).send({ message: 'The given seller ID is invalid' });
-      }
-
-      req.body.seller = { _id: seller._id, name: seller.name, email: seller.email };
-    }
-
     Object.assign(car, req.body);
 
     await car.save();
@@ -100,12 +88,21 @@ const updateCar = async (req: Request, res: Response, next: NextFunction): Promi
   }
 };
 
-const deleteCar = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+const deleteCar = async (req: AuthRequest, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
-    let car = await Car.findById(req.params.id);
+    if (!req.user) {
+      return res.status(401).send({ message: 'Authentication is required to access this resource.' });
+    }
+
+    const car = await Car.findById(req.params.id);
 
     if (!car) {
       return res.status(404).send({ message: 'The car not found with the given ID' });
+    }
+
+    // Checking if does user updating his own car and not the others'
+    if (req.user.email !== car.seller.email) {
+      return res.status(403).send({ message: "You cannot remove others' cars from the website!" });
     }
 
     await car.remove();
