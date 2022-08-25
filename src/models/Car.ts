@@ -1,9 +1,9 @@
-import Car from './types/Car';
-import driveTrain from './enums/drive-train';
-import colors from './enums/colors';
-import fuelTypes from './enums/fuel-types';
-import bodyStyles from './enums/body-styles';
-import trims from './enums/trims';
+import Car from '../tsd/types/Car';
+import driveTrain from '../tsd/enums/drive-train';
+import colors from '../tsd/enums/colors';
+import fuelTypes from '../tsd/enums/fuel-types';
+import bodyStyles from '../tsd/enums/body-styles';
+import trims from '../tsd/enums/trims';
 import { createSchema, updateSchema } from '../schemas/Car';
 import { Request } from 'express';
 import mongoose, { Schema, model } from 'mongoose';

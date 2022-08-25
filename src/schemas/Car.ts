@@ -1,9 +1,9 @@
 import Joi from 'joi';
-import driveTrain from '../models/enums/drive-train';
-import colors from '../models/enums/colors';
-import fuelTypes from '../models/enums/fuel-types';
-import trims from '../models/enums/trims';
-import bodyStyles from '../models/enums/body-styles';
+import driveTrain from '../tsd/enums/drive-train';
+import colors from '../tsd/enums/colors';
+import fuelTypes from '../tsd/enums/fuel-types';
+import trims from '../tsd/enums/trims';
+import bodyStyles from '../tsd/enums/body-styles';
 
 const createSchema = Joi.object({
   brand: Joi.string().length(24).hex().required(),
