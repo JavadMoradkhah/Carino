@@ -1,11 +1,21 @@
 import AuthRequest from '../tsd/interfaces/AuthRequest';
 import { Car } from '../models/Car';
 import { Brand } from '../models/Brand';
+import NodeCache from 'node-cache';
 import { Request, Response, NextFunction } from 'express';
 
-const getAllCars = async (req: Request, res: Response, next: NextFunction) => {
+const cache = new NodeCache({ stdTTL: 60 });
+
+const getAllCars = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
-    const cars = await Car.find({});
+    let cars = cache.get('cars');
+    if (cars) {
+      return res.send(cars);
+    }
+
+    cars = await Car.find({});
+    cache.set('cars', cars);
+
     res.send(cars);
   } catch (error) {
     next(error);
@@ -14,11 +24,20 @@ const getAllCars = async (req: Request, res: Response, next: NextFunction) => {
 
 const getCarByID = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
-    const car = await Car.findById(req.params.id);
+    const id = req.params.id;
+    const idInCache = `car_${id}`;
 
+    let car = cache.get(idInCache);
+    if (car) {
+      return res.send(car);
+    }
+
+    car = await Car.findById(id);
     if (!car) {
       return res.status(404).send({ message: 'The car not found with the given ID' });
     }
+
+    cache.set(idInCache, car);
 
     res.send(car);
   } catch (error) {

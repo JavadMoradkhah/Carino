@@ -1,9 +1,19 @@
 import { Brand } from '../models/Brand';
+import NodeCache from 'node-cache';
 import { Request, Response, NextFunction } from 'express';
 
-const getAllBrands = async (req: Request, res: Response, next: NextFunction) => {
+const cache = new NodeCache({ stdTTL: 3600 });
+
+const getAllBrands = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
-    const brands = await Brand.find({});
+    let brands = cache.get('brands');
+    if (brands) {
+      return res.send(brands);
+    }
+
+    brands = await Brand.find({});
+    cache.set('brands', brands);
+
     res.send(brands);
   } catch (error) {
     next(error);
@@ -12,11 +22,20 @@ const getAllBrands = async (req: Request, res: Response, next: NextFunction) => 
 
 const getBrandByID = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
-    const brand = await Brand.findById(req.params.id);
+    const id = req.params.id;
+    const idInCache = `brand_${id}`;
 
+    let brand = cache.get(idInCache);
+    if (brand) {
+      return res.send(brand);
+    }
+
+    brand = await Brand.findById(id);
     if (!brand) {
       return res.status(404).send({ message: 'The brand not found with the given ID' });
     }
+
+    cache.set(idInCache, brand);
 
     res.send(brand);
   } catch (error) {
