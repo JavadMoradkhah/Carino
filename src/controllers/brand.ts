@@ -36,7 +36,7 @@ const createBrand = async (req: Request, res: Response, next: NextFunction): Pro
 
     await brand.save();
 
-    res.send(brand);
+    res.status(201).send(brand);
   } catch (error) {
     next(error);
   }

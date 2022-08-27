@@ -23,7 +23,7 @@ const registerUser = async (req: Request, res: Response, next: NextFunction): Pr
 
     result.token = token;
 
-    res.send({ result });
+    res.status(201).send({ result });
   } catch (error) {
     if (error instanceof mongo.MongoError && error.code === 11000) {
       return res.status(400).send({ message: 'The user already exists with the given email' });
@@ -59,9 +59,6 @@ const loginUser = async (req: Request, res: Response, next: NextFunction): Promi
 
     res.send({ result: payload });
   } catch (error) {
-    if (error instanceof mongo.MongoError && error.code === 11000) {
-      return res.status(400).send({ message: 'The user already exists with the given email' });
-    }
     next(error);
   }
 };

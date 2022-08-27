@@ -45,7 +45,7 @@ const createCar = async (req: AuthRequest, res: Response, next: NextFunction): P
 
     await car.save();
 
-    res.send(car);
+    res.status(201).send(car);
   } catch (error) {
     next(error);
   }
