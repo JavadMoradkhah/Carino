@@ -1,4 +1,4 @@
-import { Brand, validate } from '../models/Brand';
+import { Brand } from '../models/Brand';
 import { Request, Response, NextFunction } from 'express';
 
 const getAllBrands = async (req: Request, res: Response, next: NextFunction) => {
