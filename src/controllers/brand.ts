@@ -20,17 +20,12 @@ const getBrandByID = async (req: Request, res: Response, next: NextFunction): Pr
 
     res.send(brand);
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
 const createBrand = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
-    const { error: validationError } = validate(req);
-    if (validationError) {
-      return res.status(400).send({ message: validationError.message });
-    }
-
     let brand = await Brand.findOne({ name: req.body.name });
 
     if (brand) {
@@ -49,17 +44,10 @@ const createBrand = async (req: Request, res: Response, next: NextFunction): Pro
 
 const updateBrand = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
-    const id = req.params.id;
-
-    let brand = await Brand.findById(id);
+    const brand = await Brand.findById(req.params.id);
 
     if (!brand) {
       return res.status(404).send({ message: 'The brand not found with the given ID' });
-    }
-
-    const { error: validationError } = validate(req);
-    if (validationError) {
-      return res.status(400).send({ message: validationError.message });
     }
 
     if (await Brand.findOne({ name: req.body.name })) {
@@ -78,9 +66,7 @@ const updateBrand = async (req: Request, res: Response, next: NextFunction): Pro
 
 const deleteBrand = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
-    const id = req.params.id;
-
-    let brand = await Brand.findById(id);
+    let brand = await Brand.findById(req.params.id);
 
     if (!brand) {
       return res.status(404).send({ message: 'The brand not found with the given ID' });
