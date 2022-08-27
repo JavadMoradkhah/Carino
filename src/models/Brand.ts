@@ -4,7 +4,7 @@ import { Schema, model } from 'mongoose';
 
 const BrandSchema = new Schema(
   {
-    name: { type: String, minLength: 3, maxLength: 30, unique: true, required: true },
+    name: { type: String, index: true, unique: true, minLength: 3, maxLength: 30, required: true },
   },
   { timestamps: true }
 );

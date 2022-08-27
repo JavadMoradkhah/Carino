@@ -8,7 +8,7 @@ import { Schema, model } from 'mongoose';
 const UserSchema = new Schema<User>(
   {
     name: { type: String, minLength: 2, maxLength: 30, required: true },
-    email: { type: String, minLength: 5, maxLength: 50, unique: true, required: true },
+    email: { type: String, index: true, unique: true, minLength: 5, maxLength: 50, required: true },
     password: { type: String, minLength: 8, maxLength: 80, required: true },
   },
   { timestamps: true }

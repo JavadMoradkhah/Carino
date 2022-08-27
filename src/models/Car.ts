@@ -12,7 +12,7 @@ const CarSchema = new Schema<Car>(
   {
     brand: new Schema({
       _id: { type: mongoose.Types.ObjectId, ref: 'Brand', required: true },
-      name: { type: String, required: true },
+      name: { type: String, index: true, required: true },
     }),
     condition: { type: String, enum: ['NEW', 'USED', 'CERTIFIED'], required: true },
     description: { type: String, maxLength: 2048 },
@@ -22,18 +22,18 @@ const CarSchema = new Schema<Car>(
     images: { type: [String], required: true },
     interiorColor: { type: String, enum: colors, required: true },
     location: {
-      country: { type: String, required: true },
-      state: { type: String, required: true },
-      city: { type: String, required: true },
+      country: { type: String, index: true, required: true },
+      state: { type: String, index: true, required: true },
+      city: { type: String, index: true, required: true },
       coordinates: { type: [Number], required: true },
     },
     mileage: { type: Number, min: 0, max: 1_000_000, required: true },
-    model: { type: String, minLength: 1, maxLength: 30, required: true },
+    model: { type: String, index: true, minLength: 1, maxLength: 30, required: true },
     price: { type: Number, min: 0, max: Number.MAX_SAFE_INTEGER, required: true },
     seller: new Schema({
       _id: { type: mongoose.Types.ObjectId, ref: 'User', required: true },
       name: { type: String, required: true },
-      email: { type: String, required: true },
+      email: { type: String, index: true, required: true },
     }),
     status: { type: String, enum: ['PENDING', 'CONFIRMED'], default: 'PENDING' },
     transmission: { type: String, enum: ['MANUAL', 'AUTOMATIC'], required: true },
