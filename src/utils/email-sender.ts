@@ -11,12 +11,13 @@ const transporter = createTransport({
   },
 });
 
-const sendEmail = async (email: string, subject: string, message: string) => {
+const sendEmail = async (email: string, subject: string, message: string = '', html: string = '') => {
   let emailInfo = await transporter.sendMail({
     from: `Carino <${process.env.MAIL_USER}>`,
     to: email,
     subject: subject,
     text: message,
+    html: html,
   });
   return emailInfo;
 };

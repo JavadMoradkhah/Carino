@@ -46,6 +46,7 @@ const validate = (req: Request, isUpdateSchema: Boolean = false) => {
       .max(30)
       .pattern(/^[A-Z]+[A-Z|a-z|\s]+$/)
       .required();
+    payload.verificationCode = Joi.number().integer().required();
   }
 
   const schema = Joi.object(payload);
