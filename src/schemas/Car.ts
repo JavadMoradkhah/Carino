@@ -8,7 +8,7 @@ import bodyStyles from '../tsd/enums/body-styles';
 const createSchema = Joi.object({
   brand: Joi.string().length(24).hex().required(),
   condition: Joi.string().valid('NEW', 'USED', 'CERTIFIED').required(),
-  description: Joi.string().max(1024),
+  description: Joi.string().max(2048),
   driveTrain: Joi.string()
     .valid(...driveTrain)
     .required(),
@@ -42,7 +42,7 @@ const createSchema = Joi.object({
 const updateSchema = Joi.object({
   brand: Joi.string().length(24).hex(),
   condition: Joi.string().valid('NEW', 'USED', 'CERTIFIED'),
-  description: Joi.string().max(1024),
+  description: Joi.string().max(2048),
   driveTrain: Joi.string().valid(...driveTrain),
   exteriorColor: Joi.string().valid(...colors),
   fuelType: Joi.string().valid(...fuelTypes),
