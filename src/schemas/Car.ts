@@ -3,7 +3,6 @@ import driveTrain from '../tsd/enums/drive-train';
 import colors from '../tsd/enums/colors';
 import fuelTypes from '../tsd/enums/fuel-types';
 import trims from '../tsd/enums/trims';
-import bodyStyles from '../tsd/enums/body-styles';
 
 const createSchema = Joi.object({
   brand: Joi.string().length(24).hex().required(),
@@ -33,9 +32,7 @@ const createSchema = Joi.object({
   price: Joi.number().min(0).max(Number.MAX_SAFE_INTEGER).required(),
   transmission: Joi.string().valid('MANUAL', 'AUTOMATIC').required(),
   trim: Joi.string().valid(...trims),
-  type: Joi.string()
-    .valid(...bodyStyles)
-    .required(),
+  type: Joi.string().length(24).hex().required(),
   year: Joi.number().min(1900).max(new Date().getFullYear()).required(),
 });
 
@@ -59,7 +56,7 @@ const updateSchema = Joi.object({
   price: Joi.number().min(0).max(Number.MAX_SAFE_INTEGER),
   transmission: Joi.string().valid('Manual', 'Automatic'),
   trim: Joi.string().valid(...trims),
-  type: Joi.string().valid(...bodyStyles),
+  type: Joi.string().length(24).hex(),
   year: Joi.number().min(1900).max(new Date().getFullYear()),
 });
 

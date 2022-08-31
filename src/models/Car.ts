@@ -2,7 +2,6 @@ import Car from '../tsd/types/Car';
 import driveTrain from '../tsd/enums/drive-train';
 import colors from '../tsd/enums/colors';
 import fuelTypes from '../tsd/enums/fuel-types';
-import bodyStyles from '../tsd/enums/body-styles';
 import trims from '../tsd/enums/trims';
 import { createSchema, updateSchema } from '../schemas/Car';
 import { Request } from 'express';
@@ -38,7 +37,7 @@ const CarSchema = new Schema<Car>(
     status: { type: String, enum: ['PENDING', 'CONFIRMED'], default: 'PENDING' },
     transmission: { type: String, enum: ['MANUAL', 'AUTOMATIC'], required: true },
     trim: { type: String, enum: trims },
-    type: { type: String, enum: bodyStyles, required: true },
+    type: { type: String, minLength: 3, maxLength: 20, required: true },
     year: { type: Number, min: 1900, max: new Date().getFullYear(), required: true },
   },
   { timestamps: true }
