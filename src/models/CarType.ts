@@ -7,7 +7,7 @@ const CarType = model<carType>(
   'Type',
   new Schema<carType>(
     {
-      name: { type: String, minLength: 3, maxLength: 20, required: true },
+      name: { type: String, unique: true, minLength: 3, maxLength: 20, required: true },
     },
     { timestamps: true }
   )
