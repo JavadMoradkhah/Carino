@@ -1,6 +1,7 @@
 import AuthRequest from '../tsd/interfaces/AuthRequest';
 import { Car } from '../models/Car';
 import { Brand } from '../models/Brand';
+import { CarType } from '../models/CarType';
 import NodeCache from 'node-cache';
 import { Request, Response, NextFunction } from 'express';
 
@@ -51,6 +52,8 @@ const createCar = async (req: AuthRequest, res: Response, next: NextFunction): P
       return res.status(401).send({ message: 'Authentication is required to access this resource.' });
     }
 
+    req.body.seller = { _id: req.user._id, name: req.user.name, email: req.user.email };
+
     const brand = await Brand.findById(req.body.brand);
     if (!brand) {
       return res.status(400).send({ message: 'The given brand ID is invalid' });
@@ -58,7 +61,12 @@ const createCar = async (req: AuthRequest, res: Response, next: NextFunction): P
 
     req.body.brand = { _id: brand._id, name: brand.name };
 
-    req.body.seller = { _id: req.user._id, name: req.user.name, email: req.user.email };
+    const type = await CarType.findById(req.body.type);
+    if (!type) {
+      return res.status(400).send({ message: 'The given car type ID is invalid' });
+    }
+
+    req.body.type = type.name;
 
     const car = new Car(req.body);
 
