@@ -10,6 +10,7 @@ const UserSchema = new Schema<User>(
     name: { type: String, minLength: 2, maxLength: 30, required: true },
     email: { type: String, index: true, unique: true, minLength: 5, maxLength: 50, required: true },
     password: { type: String, minLength: 8, maxLength: 80, required: true },
+    verified: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
@@ -46,7 +47,6 @@ const validate = (req: Request, isUpdateSchema: Boolean = false) => {
       .max(30)
       .pattern(/^[A-Z]+[A-Z|a-z|\s]+$/)
       .required();
-    payload.verificationCode = Joi.number().integer().required();
   }
 
   const schema = Joi.object(payload);

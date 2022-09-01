@@ -1,36 +1,18 @@
 import bcrypt from 'bcrypt';
 import Joi from 'joi';
-import NodeCache from 'node-cache';
 import randomCodeGenerator from '../utils/random-code-generator';
 import emailSender from '../utils/email-sender';
 import verificationTemplate from '../config/email/templates/verification';
 import { User, validate } from '../models/User';
+import { Verification } from '../models/Verification';
 import { mongo } from 'mongoose';
 import { Request, Response, NextFunction } from 'express';
-
-const codeCache = new NodeCache({ stdTTL: 120 });
 
 const registerUser = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
     const { error: validationError } = validate(req);
     if (validationError) {
       return res.status(400).send({ message: validationError.message });
-    }
-
-    const verificationCodeKey = `vCode_${req.body.email}`;
-    const verificationCode = req.body.verificationCode;
-    const savedVerificationCode = codeCache.get(verificationCodeKey);
-
-    if (!savedVerificationCode) {
-      return res
-        .status(400)
-        .send({
-          message: 'The verification code is expired or no verification code has been sent to the given email.',
-        });
-    }
-
-    if (savedVerificationCode !== verificationCode) {
-      return res.status(400).send({ message: 'Invalid verification code.' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -97,22 +79,70 @@ const sendVerificationEmail = async (req: Request, res: Response, next: NextFunc
       return res.status(400).send({ message: validationError.message });
     }
 
-    const email = req.body.email;
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return res.status(400).send({
+        message: 'You have to sign up before verifying your email.',
+      });
+    }
 
     const verificationCode = randomCodeGenerator();
-    const verificationCodeKey = `vCode_${email}`;
 
-    codeCache.set(verificationCodeKey, verificationCode);
+    const salt = await bcrypt.genSalt(10);
+
+    const hashedVerificationCode = await bcrypt.hash(verificationCode.toString(), salt);
+
+    const verification = new Verification({
+      email: req.body.email,
+      code: hashedVerificationCode,
+    });
+
+    await verification.save();
 
     const subject = 'Email Verification';
     const template = verificationTemplate(verificationCode);
 
-    await emailSender(email, subject, '', template);
+    await emailSender(req.body.email, subject, '', template);
 
-    res.status(200).send({ message: 'Verification code successfully sent.' });
+    res.status(200).send({ message: 'Verification email successfully sent.' });
   } catch (error) {
     next(error);
   }
 };
 
-export { registerUser, loginUser, sendVerificationEmail };
+const verifyEmail = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+  try {
+    const schema = Joi.object({
+      email: Joi.string().min(5).max(50).email().required(),
+      verificationCode: Joi.string().required(),
+    });
+
+    const { error: validationError } = schema.validate(req.body);
+    if (validationError) {
+      return res.status(400).send({ message: validationError.message });
+    }
+
+    const { email, verificationCode } = req.body;
+
+    const verification = await Verification.findOne({ email });
+
+    if (!verification) {
+      return res.status(400).send({
+        message: 'The verification code is expired or no verification code has been sent to the given email.',
+      });
+    }
+
+    const isCodeMatch = await bcrypt.compare(verificationCode, verification.code);
+    if (!isCodeMatch) {
+      return res.status(400).send({ message: 'Invalid verification code.' });
+    }
+
+    await User.findOneAndUpdate({ email }, { verified: true });
+
+    res.status(200).send({ message: 'Your email is verified successfully.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { registerUser, loginUser, sendVerificationEmail, verifyEmail };
