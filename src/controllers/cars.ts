@@ -66,7 +66,7 @@ const createCar = async (req: AuthRequest, res: Response, next: NextFunction): P
       return res.status(400).send({ message: 'The given car type ID is invalid' });
     }
 
-    req.body.type = type.name;
+    req.body.type = { _id: type._id, name: type.name };
 
     const car = new Car(req.body);
 
@@ -103,6 +103,16 @@ const updateCar = async (req: AuthRequest, res: Response, next: NextFunction): P
       }
 
       req.body.brand = { _id: brand._id, name: brand.name };
+    }
+
+    if (req.body.type) {
+      const type = await CarType.findById(req.body.type);
+
+      if (!type) {
+        return res.status(400).send({ message: 'The given car type ID is invalid' });
+      }
+
+      req.body.type = { _id: type._id, name: type.name };
     }
 
     Object.assign(car, req.body);

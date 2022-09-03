@@ -37,7 +37,10 @@ const CarSchema = new Schema<Car>(
     status: { type: String, enum: ['PENDING', 'CONFIRMED'], default: 'PENDING' },
     transmission: { type: String, enum: ['MANUAL', 'AUTOMATIC'], required: true },
     trim: { type: String, enum: trims },
-    type: { type: String, minLength: 3, maxLength: 20, required: true },
+    type: new Schema({
+      _id: { type: mongoose.Types.ObjectId, ref: 'Type', required: true },
+      name: { type: String, minLength: 3, maxLength: 20, required: true },
+    }),
     year: { type: Number, min: 1900, max: new Date().getFullYear(), required: true },
   },
   { timestamps: true }
