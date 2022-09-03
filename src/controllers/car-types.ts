@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 
 const getAllTypes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const types = await CarType.find({}).sort({ name: 1 }).select('_id, name');
+    const types = await CarType.find().sort({ name: 1 }).select('_id, name');
     res.send(types);
   } catch (error) {
     next(error);
