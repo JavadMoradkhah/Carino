@@ -11,7 +11,7 @@ const getAllBrands = async (req: Request, res: Response, next: NextFunction): Pr
       return res.send(brands);
     }
 
-    brands = await Brand.find({});
+    brands = await Brand.find().sort('name');
     cache.set('brands', brands);
 
     res.send(brands);
